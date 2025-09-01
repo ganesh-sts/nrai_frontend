@@ -1,0 +1,178 @@
+.coachRegisterPage {
+  height: 100vh;
+  background: url('/assets/background.jpg') no-repeat center center;
+  background-size: cover;
+  padding: 40px 20px;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 50px; // increase gap between containers for clear separation
+
+  /* HEADER CARD */
+  .headerContainerCard {
+    background: #fff;
+    padding-bottom: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(154, 15, 15, 0.25);
+    overflow: hidden;
+    border: 0px solid #fff;
+    width: 100%;
+    max-width: 600px;
+
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 0;
+      padding: 20px 0;
+      background-color: #0026a3;
+      color: #fff;
+    }
+
+    .content {
+      padding: 30px 40px;
+      text-align: center;
+
+      h2 {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+    }
+  }
+
+  /* FORM CONTAINER */
+  .formContainer {
+    background: #fff;
+    padding: 30px;
+    max-width: 500px;
+    margin: auto;
+    text-align: left;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+
+    .note {
+      font-size: 14px;
+      color: red;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 6px 40px;
+      align-items: center;
+
+      label {
+        font-weight: 100;
+        margin: 0;
+      }
+
+      input,
+      select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 93%;
+      }
+
+      .Certificateinput {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 40%;
+      }
+
+      .inlineInputs,
+      .inlineSelects {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .checkboxGroup {
+        display: flex;
+        width: 80%;
+
+        /* spread labels evenly */
+
+
+        label {
+          flex: 1;
+          /* each label takes equal space */
+          display: flex;
+          align-items: center;
+          /* vertically align input and text */
+          gap: 5px;
+        }
+      }
+
+      .radioGroup {
+        display: flex;
+        width: 40%;
+        /* spread labels evenly */
+
+        label {
+          flex: 1;
+          /* each label takes equal space */
+          display: flex;
+          align-items: center;
+          /* vertically align input and text */
+          gap: 5px;
+          /* space between input and text */
+        }
+      }
+
+      .uploadBtn {
+        padding: 6px 12px;
+        background: #8f8c8c;
+        color: #fff;
+        border: 20%;
+        border-radius: 3px;
+        width: 40%;
+        cursor: pointer;
+
+        &:hover {
+          background: #8f8c8c;
+        }
+      }
+
+      .nextBtn {
+        grid-column: 2 / 3;
+        justify-self: end;
+        background: #0026a3;
+        color: #fff;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+          background: #001a73;
+        }
+      }
+
+      .required {
+        color: red;
+      }
+
+      .formError {
+        color: red;
+        font-size: 14px;
+        margin-top: 10px;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .subText {
+        font-size: 9px;
+        color: blue;
+        display: block;
+        font-weight: normal;
+      }
+    }
+  }
+}

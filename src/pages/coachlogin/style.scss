@@ -1,0 +1,107 @@
+.loginPage {
+  height: 100vh;
+  background: url('/assets/background.jpg') no-repeat center center;
+  background-size: cover;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+
+  .headerContainerCard {
+    background: #fff;
+    padding-bottom: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 400px;
+
+    .loginLogo {
+      width: 120px; // logo width
+      height: 120px; // logo height
+      margin: 10px 10px; // pull it slightly above the card
+      background: url('/assets/National_Rifle_Association_of_India_Logo.jpg') no-repeat center center;
+      background-size: contain;
+      border-radius: 50%; // make it circular if you want
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+    .loginName{
+      width: 120px; // logo width
+      height: 120px; // logo height
+      margin: 10px 10px; // pull it slightly above the card
+      background: url('/assets/National_Rifle_Association_of_India_Logo.jpg') no-repeat center center;
+      background-size: contain;
+      border-radius: 50%; // make it circular if you want
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0;
+      padding: 20px 0;
+      color: blue;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .formContainer {
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        input[type="email"],
+        input[type="password"] {
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          font-size: 14px;
+        }
+
+        .checkbox-group {
+          display: flex;
+          gap: 20px;
+          font-size: 14px;
+        }
+
+        .nextBtn {
+          background: #0026a3;
+          color: #fff;
+          padding: 12px;
+          border: none;
+          border-radius: 5px;
+          font-weight: bold;
+          cursor: pointer;
+
+          &:hover {
+            background: #001a73;
+          }
+        }
+
+        .secondaryBtn {
+          background: #8f8c8c;
+          color: #fff;
+          padding: 12px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+
+          &:hover {
+            background: #6c6a6a;
+          }
+        }
+
+        .formError {
+          color: red;
+          font-size: 14px;
+          text-align: center;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
