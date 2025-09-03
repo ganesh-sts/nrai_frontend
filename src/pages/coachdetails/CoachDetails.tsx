@@ -3,7 +3,6 @@ import "./style.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import { mockShooterData } from "../coachregister/TempData";
 
 const CoachDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +19,7 @@ const CoachDetails: React.FC = () => {
     aadhaar: "",
     email: "",
     contact: "",
-    dob: "",
+    dateOfBirth: "",
     gender: "",
     state: "",
     address: "",
@@ -42,18 +41,30 @@ const CoachDetails: React.FC = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  /**
+  /*
    * Prefill form data if Shooter ID is available
    * Simulates fetching data from mockShooterData (like API response)
    */
-  useEffect(() => {
-    if (state?.formData?.shooterId) {
-      const shooterInfo = mockShooterData[state.formData.shooterId];
-      if (shooterInfo) {
-        setFormData((prev) => ({ ...prev, ...shooterInfo }));
-      }
-    }
-  }, [state?.formData?.shooterId]);
+
+const [isPrefilled, setIsPrefilled] = useState(false);
+
+useEffect(() => {
+  if (!state?.formData.data) return;
+
+  const data = state.formData.data;
+  console.log("UseEffect data: ", data);
+
+  setFormData(prev => ({
+    ...prev,
+    ...data, 
+    shooterId: data.shooterId || "",
+    coachId: data.coachId || "",
+  }));
+  setIsPrefilled(state.formData.fetchDetails === "yes");
+}, [state?.formData]);
+
+
+
 
   /**
    * Form submit handler
@@ -70,12 +81,12 @@ const CoachDetails: React.FC = () => {
     if (!formData.aadhaar) return setFormError("Please Enter Aadhaar Card number");
     if (!formData.email) return setFormError("Please Enter Email ID");
     if (!formData.contact) return setFormError("Please Enter Contact Number");
-    if (!formData.dob) return setFormError("Please Enter Date of Birth");
+    if (!formData.dateOfBirth) return setFormError("Please Enter Date of Birth");
     if (!formData.gender) return setFormError("Please Select Gender");
     if (!formData.state) return setFormError("Please Select State");
     if (!formData.address) return setFormError("Please Enter Address");
 
-    // ✅ All validations passed
+    //  All validations passed
     setFormError(null);
 
     console.log("Coach Details Submitted:", formData);
@@ -113,7 +124,7 @@ const CoachDetails: React.FC = () => {
                 }
               />
               {/* Edit icon triggers hidden file input */}
-              <label htmlFor="profilePhotoUpload" className="editIcon">
+              <label htmlFor="profilePhotoUpload" className="editIcon" >
                 <FontAwesomeIcon icon={faPenToSquare} />
               </label>
             </div>
@@ -128,6 +139,7 @@ const CoachDetails: React.FC = () => {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="Enter First Name"
+                readOnly={isPrefilled}
             />
 
             {/* Last Name */}
@@ -140,6 +152,7 @@ const CoachDetails: React.FC = () => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Enter Last Name"
+                readOnly={isPrefilled}
             />
 
             {/* Aadhaar */}
@@ -152,6 +165,7 @@ const CoachDetails: React.FC = () => {
               value={formData.aadhaar}
               onChange={handleChange}
               placeholder="Enter Aadhaar Number"
+                readOnly={isPrefilled}
             />
 
             {/* Email */}
@@ -164,6 +178,7 @@ const CoachDetails: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter Email ID"
+                readOnly={isPrefilled}
             />
 
             {/* Contact */}
@@ -176,6 +191,7 @@ const CoachDetails: React.FC = () => {
               value={formData.contact}
               onChange={handleChange}
               placeholder="Enter Contact No"
+                readOnly={isPrefilled}
             />
 
             {/* Date of Birth */}
@@ -185,30 +201,31 @@ const CoachDetails: React.FC = () => {
             <input
               type="date"
               name="dob"
-              value={formData.dob}
+              value={formData.dateOfBirth}
               onChange={handleChange}
               placeholder="Enter DOB"
+                readOnly={isPrefilled}
             />
 
             {/* Gender dropdown */}
             <label>
               Gender<span className="required">*</span>
             </label>
-            <select name="gender" value={formData.gender} onChange={handleChange}>
+            <select name="gender" value={formData.gender} onChange={handleChange}   disabled={isPrefilled}>
               <option>Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
             </select>
 
             {/* State dropdown */}
             <label>
               State<span className="required">*</span>
             </label>
-            <select name="state" value={formData.state} onChange={handleChange}>
+            <select name="state" value={formData.state} onChange={handleChange} disabled={isPrefilled}>
               <option value="">Select State</option>
-              <option value="goa">Goa</option>
-              <option value="delhi">Delhi</option>
-              <option value="maharashtra">Maharashtra</option>
+              <option value="Goa">Goa</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Maharashtra">Maharashtra</option>
             </select>
 
             {/* Address */}
@@ -220,6 +237,7 @@ const CoachDetails: React.FC = () => {
               value={formData.address}
               onChange={handleChange}
               placeholder="Enter Address"
+              readOnly={isPrefilled}
             />
 
             {/* Submit Button */}

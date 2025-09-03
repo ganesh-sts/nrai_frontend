@@ -47,68 +47,83 @@ const LoginPage: React.FC = () => {
     navigate("/dashboard"); // redirect to dashboard
   };
 
-  return (
-    <div className="loginPage">
-      <div className="headerContainerCard">
-        <div className="loginLogo">
+return (
+  <div className="loginPage">
+      <div className="loginContainer">
+        {/* Top Row */}
+        <div className="topRow">
+
+          <div className="logoSection">
+      <div className="loginLogo"></div>
+            <h1>LOGIN</h1>
+          </div>
         </div>
-          <div className="loginName">
-        <h1>LOGIN</h1>
-        </div>
-        <div className="formContainer">
-          <form onSubmit={handleSubmit}>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter Email"
-              value={formData.email}
-              onChange={handleChange}
-            />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter Password"
-              value={formData.password}
-              onChange={handleChange}
-            />
+     {/* Bottom Content */}
+<div className="bottomContent">
+  {/* Input Fields */}
+  <div className="inputFields">
+    <input
+      type="text"
+      name="username"
+      placeholder="Username"
+      onChange={handleChange}
+    />
+    <input
+      type="password"
+      name="password"
+      placeholder="Password"
+      onChange={handleChange}
+    />
+  </div>
 
-            <div className="checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  name="admin"
-                  checked={formData.admin}
-                  onChange={handleChange}
-                />
-                Admin
-              </label><br></br>
-              <label>
-                <input
-                  type="checkbox"
-                  name="remember"
-                  checked={formData.remember}
-                  onChange={handleChange}
-                />
-                Remember Me
-              </label>
-            </div>
+  {/* Options Row */}
+  <div className="optionsRow">
+    <label>
+      <input
+        type="checkbox"
+        name="admin"
+        checked={formData.admin}
+        onChange={handleChange}
+      />
+      Admin
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        name="remember"
+        checked={formData.remember}
+        onChange={handleChange}
+      />
+      Remember Me
+    </label>
 
-            <button type="submit" className="nextBtn">
-              Sign In
-            </button>
+    <a href="/forgot-password" className="forgotLink">
+      Forgot Password?
+    </a>
+  </div>
 
-            <button
-              type="button"
-              className="secondaryBtn"
-              onClick={() => navigate("/coach-register")}
-            >
-              New Shooter Registration
-            </button>
+  {/* Buttons */}
+  <div className="buttonRow">
+    <button type="submit" className="nextBtn" onClick={handleSubmit}>
+      Sign In
+    </button>
+  </div>
+  <div className="buttonRow">
+    <button
+      type="button"
+      className="secondaryBtn"
+      onClick={() => navigate("/")}
+    >
+      New Shooter ID Register
+    </button>
+  </div>
 
-            {formError && <div className="formError">{formError}</div>}
-          </form>
-        </div>
+
+  <p className="tagline">NRAL Shooters | Register Shooting Range</p>
+  {formError && <div className="formError">{formError}</div>}
+</div>
+
       </div>
     </div>
   );

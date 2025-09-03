@@ -1,94 +1,107 @@
 import React, { useState } from "react";
 import "./style.scss";
 import { useNavigate } from "react-router-dom";
+import { getShooterData, registerCoach } from "../../apis/api";
 
 const CoachRegister: React.FC = () => {
   const navigate = useNavigate();
-
-  // For displaying form-level errors (like missing required fields)
   const [formError, setFormError] = useState<string | null>(null);
-
-  // Store all form field values in one state object
   const [formData, setFormData] = useState({
     shooterId: "",
     coachId: "",
-    eventType: [] as string[], // multiple selection
+    eventType: [] as string[],
     years: "",
     months: "",
     certificate: "",
+    uploadedFile: null as File | null,
     nraiLicence: "",
     nraiValidUpto: "",
     issfLicence: "",
     issfValidUpto: "",
-    fetchDetails: "yes", // default selected option
+    fetchDetails: "yes",
   });
 
-  // Store field-specific errors for showing under inputs
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  /**
-   * Handle input/select value changes
-   * Updates formData state dynamically based on field name
-   * Clears error message for that field on change
-   */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" }); // clear error when user types/selects
   };
 
-  /**
-   * Handle checkbox group (eventType)
-   * If checked => add to array, else remove
-   */
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       eventType: checked
         ? [...prev.eventType, value]
-        : prev.eventType.filter(ev => ev !== value),
+        : prev.eventType.filter((ev) => ev !== value),
     }));
-    setErrors({ ...errors, eventType: "" });
   };
 
-  /**
-   * Form submission handler
-   * - Validates all fields
-   * - Shows error if something is missing
-   * - On success, navigates to CoachDetails page
-   */
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setFormData({ ...formData, uploadedFile: file });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // === Validation checks ===
-    if (!formData.shooterId) return setFormError("Please enter NRAI Shooter ID");
-    if (!formData.coachId) return setFormError("Please enter NRAI Coach ID");
-    if (formData.eventType.length === 0)
-      return setFormError("Please select at least one Event Type");
-    if (!formData.years || !formData.months)
-      return setFormError("Please select Experience");
-    if (!formData.certificate) return setFormError("Please enter Certificate Name");
-    if (!formData.nraiLicence || !formData.nraiValidUpto)
-      return setFormError("Please enter NRAI No and date");
-    if (!formData.issfLicence || !formData.issfValidUpto)
-      return setFormError("Please enter ISSF No and date");
-    if (!formData.fetchDetails)
-      return setFormError("Please select if you want to fetch details");
+    // Validation
+    if (formData.eventType.length === 0) {
+      setFormError("Please select at least one Event Type");
+      return;
+    }
+    if (!formData.years || !formData.months) {
+      setFormError("Please select Experience");
+      return;
+    }
+    if (!formData.certificate) {
+      setFormError("Please enter Certificate Name");
+      return;
+    }
+    if (!formData.uploadedFile) {
+      setFormError("Please Upload Certificate");
+      return;
+    }
+    if (!formData.nraiLicence || !formData.nraiValidUpto) {
+      setFormError("Please enter NRAI Licence No and Date");
+      return;
+    }
+    if (!formData.issfLicence || !formData.issfValidUpto) {
+      setFormError("Please enter ISSF Licence No and Date");
+      return;
+    }
+    if (!formData.fetchDetails) {
+      setFormError("Please select if you want to fetch details");
+      return;
+    }
 
-    // ✅ All validations passed
-    setFormError(null);
+    try {
+      let payload: any;
 
-    // Navigate to details page
-    navigate("/coach-details", {
-      state:
-        formData.fetchDetails === "yes"
-          ? { shooterId: formData.shooterId, coachId: formData.coachId }
-          : null,
-    });
+      if (formData.fetchDetails === "yes") {
+        // fetch data by shooterId
+        const data = await getShooterData(formData.shooterId);
+        if (!data) {
+          setFormError("Shooter ID not found");
+          return;
+        }
+        payload = { ...data,...formData };
+      } else {
+        payload = { ...formData };
+      }
+
+      // call register API
+      // await registerCoach(payload);
+      console.log("Payload: ", payload);
+      // Navigate to CoachDetails page with data
+      navigate("/coach-details", { state: { formData: payload } });
+    } catch (err) {
+      setFormError("Something went wrong. Try again.");
+    }
   };
 
-  return (
+   return (
     <div className="coachRegisterPage">
       <div className="headerContainerCard">
         <h1>NEW COACH REGISTRATION</h1>
@@ -148,7 +161,6 @@ const CoachRegister: React.FC = () => {
                 </label>
               ))}
             </div>
-            {errors.eventType && <p className="error">{errors.eventType}</p>}
 
             {/* Coaching Experience */}
             <label>
@@ -172,9 +184,6 @@ const CoachRegister: React.FC = () => {
                 ))}
               </select>
             </div>
-            {(errors.years || errors.months) && (
-              <p className="error">{errors.years || errors.months}</p>
-            )}
 
             {/* Certificate input */}
             <label>
@@ -188,10 +197,31 @@ const CoachRegister: React.FC = () => {
               value={formData.certificate}
               onChange={handleChange}
             />
-            {errors.certificate && <p className="error">{errors.certificate}</p>}
-            <button type="button" className="uploadBtn">
+
+            {/* Hidden file input */}
+            <input
+              type="file"
+              id="certificateUpload"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // Store file separately, do not overwrite manual certificate name
+                  setFormData({ ...formData, uploadedFile: file });
+
+                }
+              }}
+            />
+
+            {/* Upload Button triggers hidden input */}
+            <button
+              type="button"
+              className="uploadBtn"
+              onClick={() => document.getElementById("certificateUpload")?.click()}
+            >
               Upload
             </button>
+
 
             {/* NRAI Licence */}
             <br />
