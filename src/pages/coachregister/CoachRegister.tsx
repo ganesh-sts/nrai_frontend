@@ -1,19 +1,23 @@
 import React, { useState } from "react";
 import "./style.scss";
 import { useNavigate } from "react-router-dom";
-import { getShooterData, registerCoach } from "../../apis/api";
+import { getShooterData } from "../../apis/api";
+
+type Certificate = {
+  name: string;
+  file: File | null; // file can be null or File object
+};
 
 const CoachRegister: React.FC = () => {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     shooterId: "",
-    coachId: "",
+    nraiId: "",
     eventType: [] as string[],
-    years: "",
-    months: "",
-    certificate: "",
-    uploadedFile: null as File | null,
+    coachingExperienceYear: "",
+    coachingExperienceMonth: "",
+    certificate: [{ name: "", file: null }] as Certificate[],
     nraiLicence: "",
     nraiValidUpto: "",
     issfLicence: "",
@@ -38,29 +42,31 @@ const CoachRegister: React.FC = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setFormData({ ...formData, uploadedFile: file });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
+    // Validation before going to next page
+    if (!formData.shooterId) {
+      setFormError("Shooter ID is required");
+      return;
+    }
     if (formData.eventType.length === 0) {
       setFormError("Please select at least one Event Type");
       return;
     }
-    if (!formData.years || !formData.months) {
-      setFormError("Please select Experience");
+    if (!formData.coachingExperienceYear || !formData.coachingExperienceMonth) {
+      setFormError("Please select your coaching experience");
       return;
     }
-    if (!formData.certificate) {
-      setFormError("Please enter Certificate Name");
+    if (
+      formData.certificate.length === 0 ||
+      formData.certificate.some((cert) => !cert.name)
+    ) {
+      setFormError("Please enter Certificate Name for all entries");
       return;
     }
-    if (!formData.uploadedFile) {
-      setFormError("Please Upload Certificate");
+    if (formData.certificate.some((cert) => !cert.file)) {
+      setFormError("Please upload file for all certificates");
       return;
     }
     if (!formData.nraiLicence || !formData.nraiValidUpto) {
@@ -76,219 +82,239 @@ const CoachRegister: React.FC = () => {
       return;
     }
 
-    try {
-      let payload: any;
+    setFormError(null);
 
-      if (formData.fetchDetails === "yes") {
-        // fetch data by shooterId
+    // If fetchDetails = yes, fetch data from API
+    let payload = { ...formData };
+    if (formData.fetchDetails === "yes") {
+      try {
         const data = await getShooterData(formData.shooterId);
         if (!data) {
           setFormError("Shooter ID not found");
           return;
         }
-        payload = { ...data,...formData };
-      } else {
-        payload = { ...formData };
+        payload = { ...payload, ...data };
+      } catch {
+        setFormError("Error fetching Shooter Data");
+        return;
       }
-
-      // call register API
-      // await registerCoach(payload);
-      console.log("Payload: ", payload);
-      // Navigate to CoachDetails page with data
-      navigate("/coach-details", { state: { formData: payload } });
-    } catch (err) {
-      setFormError("Something went wrong. Try again.");
     }
+    console.log(payload)
+    // Navigate to second page with formData
+    navigate("/coach-details", { state: { formData: payload } });
   };
 
-   return (
+  return (
     <div className="coachRegisterPage">
       <div className="headerContainerCard">
         <h1>NEW COACH REGISTRATION</h1>
         <h2>Coach Registration Details</h2>
-
         <div className="formContainer">
-          <p className="note">
-            Note: Only NRAI Shooter can register as NRAI Coach
-          </p>
-
-          {/* === Registration Form === */}
-          <form onSubmit={handleSubmit}>
+          <p className="note">Note: Only NRAI Shooter can register as NRAI Coach</p>
+          <form onSubmit={handleNext}>
             {/* Shooter ID */}
-            <label>
-              NRAI Shooter ID
-              <span className="subText">
-                (If already registered as Shooter with NRAI offline/online)
-              </span>
-            </label>
-            <input
-              type="text"
-              name="shooterId"
-              placeholder="Enter Shooter Id"
-              value={formData.shooterId}
-              onChange={handleChange}
-            />
+            <div className="formGroup">
+              <label>
+                NRAI Shooter ID
+                <span className="subText">
+                  (If already registered as Shooter with NRAI offline/online)
+                </span>
+              </label>
+              <input
+                type="text"
+                name="shooterId"
+                placeholder="Enter Shooter Id"
+                value={formData.shooterId}
+                onChange={handleChange}
+              />
+            </div>
 
             {/* Coach ID */}
-            <label>
-              NRAI Coach ID
-              <span className="subText">
-                (If already registered as Coach with NRAI offline)
-              </span>
-            </label>
-            <input
-              type="text"
-              name="coachId"
-              placeholder="Enter Coach Id"
-              value={formData.coachId}
-              onChange={handleChange}
-            />
+            <div className="formGroup">
+              <label>
+                NRAI Coach ID
+                <span className="subText">
+                  (If already registered as Coach with NRAI offline)
+                </span>
+              </label>
+              <input
+                type="text"
+                name="nraiId"
+                placeholder="Enter Coach Id"
+                value={formData.nraiId}
+                onChange={handleChange}
+              />
+            </div>
 
-            {/* Event Type checkboxes */}
-            <label>
-              Event Type <span className="required">*</span>
-            </label>
-            <div className="checkboxGroup">
-              {["Pistol", "Rifle", "Shotgun"].map(ev => (
-                <label key={ev}>
+            {/* Event Type */}
+            <div className="formGroup">
+              <label>
+                Event Type <span className="required">*</span>
+              </label>
+              <div className="checkboxGroup">
+                {["Pistol", "Rifle", "Shotgun"].map((ev) => (
+                  <label key={ev}>
+                    <input
+                      type="checkbox"
+                      value={ev}
+                      checked={formData.eventType.includes(ev)}
+                      onChange={handleCheckboxChange}
+                    />
+                    {ev}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Experience */}
+            <div className="formGroup">
+              <label>
+                Coaching Experience <span className="required">*</span>
+              </label>
+              <div className="inlineSelects">
+                <select name="coachingExperienceYear" value={formData.coachingExperienceYear} onChange={handleChange}>
+                  <option value="">Select Years</option>
+                  {Array.from({ length: 30 }, (_, i) => (
+                    <option key={i} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+                <select name="coachingExperienceMonth" value={formData.coachingExperienceMonth} onChange={handleChange}>
+                  <option value="">Select Months</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Certificates */}
+            <div className="formGroup">
+              <label>
+                Coach Course Certificate <span className="required">*</span>
+              </label>
+              {formData.certificate.map((cert, index) => (
+                <div key={index} className="inlineInputs" style={{ marginBottom: "8px" }}>
                   <input
-                    type="checkbox"
-                    value={ev}
-                    checked={formData.eventType.includes(ev)}
-                    onChange={handleCheckboxChange}
-                  />{" "}
-                  {ev}
-                </label>
+                    type="text"
+                    placeholder="Enter Certificate Name"
+                    value={cert.name}
+                    onChange={(e) => {
+                      const updated = [...formData.certificate];
+                      updated[index].name = e.target.value;
+                      setFormData({ ...formData, certificate: updated });
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="uploadBtn"
+                    onClick={() =>
+                      document.getElementById(`certificateUpload-${index}`)?.click()
+                    }
+                  >
+                    Upload
+                  </button>
+                  <input
+                    type="file"
+                    id={`certificateUpload-${index}`}
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const updated = [...formData.certificate];
+                        updated[index].file = file;
+                        setFormData({ ...formData, certificate: updated });
+                      }
+                    }}
+                  />
+                  {index === formData.certificate.length - 1 && (
+                    <button
+                      type="button"
+                      className="addCertBtn"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          certificate: [...formData.certificate, { name: "", file: null }],
+                        })
+                      }
+                    >
+                      +
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
 
-            {/* Coaching Experience */}
-            <label>
-              Coaching Experience <span className="required">*</span>
-            </label>
-            <div className="inlineSelects">
-              <select name="years" value={formData.years} onChange={handleChange}>
-                <option value="">Select Years</option>
-                {Array.from({ length: 30 }, (_, i) => (
-                  <option key={i} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
-              <select name="months" value={formData.months} onChange={handleChange}>
-                <option value="">Select Months</option>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Certificate input */}
-            <label>
-              Coach Course Certificate <span className="required">*</span>
-            </label>
-            <input
-              className="Certificateinput"
-              type="text"
-              name="certificate"
-              placeholder="Enter Certificate Name"
-              value={formData.certificate}
-              onChange={handleChange}
-            />
-
-            {/* Hidden file input */}
-            <input
-              type="file"
-              id="certificateUpload"
-              style={{ display: "none" }}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  // Store file separately, do not overwrite manual certificate name
-                  setFormData({ ...formData, uploadedFile: file });
-
-                }
-              }}
-            />
-
-            {/* Upload Button triggers hidden input */}
-            <button
-              type="button"
-              className="uploadBtn"
-              onClick={() => document.getElementById("certificateUpload")?.click()}
-            >
-              Upload
-            </button>
-
-
             {/* NRAI Licence */}
-            <br />
-            <label>
-              NRAI Licence <span className="required">*</span>
-            </label>
-            <div className="inlineInputs">
-              <input
-                type="text"
-                name="nraiLicence"
-                placeholder="Licence No"
-                value={formData.nraiLicence}
-                onChange={handleChange}
-              />
-              <input
-                type="date"
-                name="nraiValidUpto"
-                value={formData.nraiValidUpto}
-                onChange={handleChange}
-              />
+            <div className="formGroup">
+              <label>
+                NRAI Licence <span className="required">*</span>
+              </label>
+              <div className="inlineInputs">
+                <input
+                  type="text"
+                  name="nraiLicence"
+                  placeholder="Licence No"
+                  value={formData.nraiLicence}
+                  onChange={handleChange}
+                />
+                <input
+                  type="date"
+                  name="nraiValidUpto"
+                  value={formData.nraiValidUpto}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
             {/* ISSF Licence */}
-            <label>
-              ISSF Licence <span className="required">*</span>
-            </label>
-            <div className="inlineInputs">
-              <input
-                type="text"
-                name="issfLicence"
-                placeholder="Licence No"
-                value={formData.issfLicence}
-                onChange={handleChange}
-              />
-              <input
-                type="date"
-                name="issfValidUpto"
-                placeholder="Valid Upto"
-                value={formData.issfValidUpto}
-                onChange={handleChange}
-              />
+            <div className="formGroup">
+              <label>
+                ISSF Licence <span className="required">*</span>
+              </label>
+              <div className="inlineInputs">
+                <input
+                  type="text"
+                  name="issfLicence"
+                  placeholder="Licence No"
+                  value={formData.issfLicence}
+                  onChange={handleChange}
+                />
+                <input
+                  type="date"
+                  name="issfValidUpto"
+                  value={formData.issfValidUpto}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
             {/* Fetch Details */}
-            <label>
-              Do you want to fetch your details from your Shooter ID?{" "}
-              <span className="required">*</span>
-            </label>
-            <div className="radioGroup">
-              {["yes", "no"].map(opt => (
-                <label key={opt}>
-                  <input
-                    type="radio"
-                    name="fetchDetails"
-                    value={opt}
-                    checked={formData.fetchDetails === opt}
-                    onChange={handleChange}
-                  />{" "}
-                  {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                </label>
-              ))}
+            <div className="formGroup">
+              <label>
+                Do you want to fetch your details from your Shooter ID?{" "}
+                <span className="required">*</span>
+              </label>
+              <div className="radioGroup">
+                {["yes", "no"].map((opt) => (
+                  <label key={opt}>
+                    <input
+                      type="radio"
+                      name="fetchDetails"
+                      value={opt}
+                      checked={formData.fetchDetails === opt}
+                      onChange={handleChange}
+                    />
+                    {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                  </label>
+                ))}
+              </div>
             </div>
 
-            {/* Display global form error */}
             {formError && <div className="formError">{formError}</div>}
-
-            {/* Submit button */}
             <button type="submit" className="nextBtn">
               Next Page
             </button>

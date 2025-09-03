@@ -3,15 +3,14 @@ import "./style.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import { registerCoach } from "../../apis/api"; // make sure your API exists
 
 const CoachDetails: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Data passed from previous page (CoachRegister)
   const state = location.state as { formData?: any };
 
-  // Store all form field values in one state object
   const [formData, setFormData] = useState({
     profilePhoto: "",
     firstName: "",
@@ -24,16 +23,35 @@ const CoachDetails: React.FC = () => {
     state: "",
     address: "",
     shooterId: state?.formData?.shooterId || "",
-    coachId: state?.formData?.coachId || "",
+    nraiId: state?.formData?.nraiId || "",
+    eventType: state?.formData?.eventType || [],
+    coachingExperienceYear: state?.formData?.coachingExperienceYear || "",
+    coachingExperienceMonth: state?.formData?.coachingExperienceMonth || "",
+    certificate: state?.formData?.certificate || [],
+    nraiLicence: state?.formData?.nraiLicence || "",
+    nraiValidUpto: state?.formData?.nraiValidUpto || "",
+    issfLicence: state?.formData?.issfLicence || "",
+    issfValidUpto: state?.formData?.issfValidUpto || "",
   });
 
-  // Holds a single form-level error message
   const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPrefilled, setIsPrefilled] = useState(false);
 
-  /**
-   * Handle input/select/textarea changes
-   * Updates state dynamically based on "name" attribute
-   */
+  useEffect(() => {
+    if (!state?.formData.data) return;
+    const data = state.formData.data;
+    setFormData(prev => ({
+      ...prev,
+      ...data,
+      shooterId: data.shooterId || "",
+      nraiId: data.nraiId || "",
+    }));
+    if (state.formData.fetchDetails === "yes") {
+      setIsPrefilled(true);
+    }
+  }, [state?.formData]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -41,41 +59,14 @@ const CoachDetails: React.FC = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  /*
-   * Prefill form data if Shooter ID is available
-   * Simulates fetching data from mockShooterData (like API response)
-   */
-
-const [isPrefilled, setIsPrefilled] = useState(false);
-
-useEffect(() => {
-  if (!state?.formData.data) return;
-
-  const data = state.formData.data;
-  console.log("UseEffect data: ", data);
-
-  setFormData(prev => ({
-    ...prev,
-    ...data, 
-    shooterId: data.shooterId || "",
-    coachId: data.coachId || "",
-  }));
-  setIsPrefilled(state.formData.fetchDetails === "yes");
-}, [state?.formData]);
-
-
-
-
-  /**
-   * Form submit handler
-   * - Validates all required fields
-   * - Shows error if any field is missing
-   * - If valid, redirects to login page
-   */
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+      if (state?.formData?.fetchDetails === "yes") {
+    navigate("/coach-login");
+    return;
+  }
 
-    // === Validation checks ===
+    // Validation
     if (!formData.firstName) return setFormError("Please Enter First Name");
     if (!formData.lastName) return setFormError("Please Enter Last Name");
     if (!formData.aadhaar) return setFormError("Please Enter Aadhaar Card number");
@@ -86,14 +77,24 @@ useEffect(() => {
     if (!formData.state) return setFormError("Please Select State");
     if (!formData.address) return setFormError("Please Enter Address");
 
-    //  All validations passed
     setFormError(null);
+    setIsSubmitting(true);
 
-    console.log("Coach Details Submitted:", formData);
+    try {
+      // Call the registration API here
+     
+      await registerCoach(formData);
 
-    // Redirect to login (next step after registration)
-    navigate("/coach-login");
+      alert("Coach Registered Successfully!");
+      navigate("/coach-login");
+    } catch (error) {
+      console.error(error);
+      setFormError("Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="coachDetailsPage">
@@ -139,7 +140,7 @@ useEffect(() => {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="Enter First Name"
-                readOnly={isPrefilled}
+              readOnly={isPrefilled}
             />
 
             {/* Last Name */}
@@ -152,7 +153,7 @@ useEffect(() => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Enter Last Name"
-                readOnly={isPrefilled}
+              readOnly={isPrefilled}
             />
 
             {/* Aadhaar */}
@@ -165,7 +166,7 @@ useEffect(() => {
               value={formData.aadhaar}
               onChange={handleChange}
               placeholder="Enter Aadhaar Number"
-                readOnly={isPrefilled}
+              readOnly={isPrefilled}
             />
 
             {/* Email */}
@@ -178,7 +179,7 @@ useEffect(() => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter Email ID"
-                readOnly={isPrefilled}
+              readOnly={isPrefilled}
             />
 
             {/* Contact */}
@@ -191,7 +192,7 @@ useEffect(() => {
               value={formData.contact}
               onChange={handleChange}
               placeholder="Enter Contact No"
-                readOnly={isPrefilled}
+              readOnly={isPrefilled}
             />
 
             {/* Date of Birth */}
@@ -200,18 +201,18 @@ useEffect(() => {
             </label>
             <input
               type="date"
-              name="dob"
+              name="dateOfBirth"
               value={formData.dateOfBirth}
               onChange={handleChange}
               placeholder="Enter DOB"
-                readOnly={isPrefilled}
+              readOnly={isPrefilled}
             />
 
             {/* Gender dropdown */}
             <label>
               Gender<span className="required">*</span>
             </label>
-            <select name="gender" value={formData.gender} onChange={handleChange}   disabled={isPrefilled}>
+            <select name="gender" value={formData.gender} onChange={handleChange} disabled={isPrefilled}>
               <option>Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
