@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import "./style.scss";
-import { useNavigate } from "react-router-dom";
-import { getShooterData } from "../../apis/api";
+import React, { useState } from 'react';
+import './style.scss';
+import { useNavigate } from 'react-router-dom';
+import { getShooterData } from '../../apis/api';
 
 type Certificate = {
   name: string;
@@ -12,22 +12,20 @@ const CoachRegister: React.FC = () => {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    shooterId: "",
-    nraiId: "",
+    shooterId: '',
+    nraiId: '',
     eventType: [] as string[],
-    coachingExperienceYear: "",
-    coachingExperienceMonth: "",
-    certificate: [{ name: "", file: null }] as Certificate[],
-    nraiLicence: "",
-    nraiValidUpto: "",
-    issfLicence: "",
-    issfValidUpto: "",
-    fetchDetails: "yes",
+    coachingExperienceYear: '',
+    coachingExperienceMonth: '',
+    certificate: [{ name: '', file: null }] as Certificate[],
+    nraiLicence: '',
+    nraiValidUpto: '',
+    issfLicence: '',
+    issfValidUpto: '',
+    fetchDetails: 'yes',
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -36,9 +34,7 @@ const CoachRegister: React.FC = () => {
     const { value, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      eventType: checked
-        ? [...prev.eventType, value]
-        : prev.eventType.filter((ev) => ev !== value),
+      eventType: checked ? [...prev.eventType, value] : prev.eventType.filter((ev) => ev !== value),
     }));
   };
 
@@ -47,38 +43,35 @@ const CoachRegister: React.FC = () => {
 
     // Validation before going to next page
     if (!formData.shooterId) {
-      setFormError("Shooter ID is required");
+      setFormError('Shooter ID is required');
       return;
     }
     if (formData.eventType.length === 0) {
-      setFormError("Please select at least one Event Type");
+      setFormError('Please select at least one Event Type');
       return;
     }
     if (!formData.coachingExperienceYear || !formData.coachingExperienceMonth) {
-      setFormError("Please select your coaching experience");
+      setFormError('Please select your coaching experience');
       return;
     }
-    if (
-      formData.certificate.length === 0 ||
-      formData.certificate.some((cert) => !cert.name)
-    ) {
-      setFormError("Please enter Certificate Name for all entries");
+    if (formData.certificate.length === 0 || formData.certificate.some((cert) => !cert.name)) {
+      setFormError('Please enter Certificate Name for all entries');
       return;
     }
     if (formData.certificate.some((cert) => !cert.file)) {
-      setFormError("Please upload file for all certificates");
+      setFormError('Please upload file for all certificates');
       return;
     }
     if (!formData.nraiLicence || !formData.nraiValidUpto) {
-      setFormError("Please enter NRAI Licence No and Date");
+      setFormError('Please enter NRAI Licence No and Date');
       return;
     }
     if (!formData.issfLicence || !formData.issfValidUpto) {
-      setFormError("Please enter ISSF Licence No and Date");
+      setFormError('Please enter ISSF Licence No and Date');
       return;
     }
     if (!formData.fetchDetails) {
-      setFormError("Please select if you want to fetch details");
+      setFormError('Please select if you want to fetch details');
       return;
     }
 
@@ -86,22 +79,22 @@ const CoachRegister: React.FC = () => {
 
     // If fetchDetails = yes, fetch data from API
     let payload = { ...formData };
-    if (formData.fetchDetails === "yes") {
+    if (formData.fetchDetails === 'yes') {
       try {
         const data = await getShooterData(formData.shooterId);
         if (!data) {
-          setFormError("Shooter ID not found");
+          setFormError('Shooter ID not found');
           return;
         }
         payload = { ...payload, ...data };
       } catch {
-        setFormError("Error fetching Shooter Data");
+        setFormError('Error fetching Shooter Data');
         return;
       }
     }
-    console.log(payload)
+    console.log(payload);
     // Navigate to second page with formData
-    navigate("/coach-details", { state: { formData: payload } });
+    navigate('/coach-details', { state: { formData: payload } });
   };
 
   return (
@@ -133,9 +126,7 @@ const CoachRegister: React.FC = () => {
             <div className="formGroup">
               <label>
                 NRAI Coach ID
-                <span className="subText">
-                  (If already registered as Coach with NRAI offline)
-                </span>
+                <span className="subText">(If already registered as Coach with NRAI offline)</span>
               </label>
               <input
                 type="text"
@@ -152,7 +143,7 @@ const CoachRegister: React.FC = () => {
                 Event Type <span className="required">*</span>
               </label>
               <div className="checkboxGroup">
-                {["Pistol", "Rifle", "Shotgun"].map((ev) => (
+                {['Pistol', 'Rifle', 'Shotgun'].map((ev) => (
                   <label key={ev}>
                     <input
                       type="checkbox"
@@ -172,7 +163,11 @@ const CoachRegister: React.FC = () => {
                 Coaching Experience <span className="required">*</span>
               </label>
               <div className="inlineSelects">
-                <select name="coachingExperienceYear" value={formData.coachingExperienceYear} onChange={handleChange}>
+                <select
+                  name="coachingExperienceYear"
+                  value={formData.coachingExperienceYear}
+                  onChange={handleChange}
+                >
                   <option value="">Select Years</option>
                   {Array.from({ length: 30 }, (_, i) => (
                     <option key={i} value={i + 1}>
@@ -180,7 +175,11 @@ const CoachRegister: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <select name="coachingExperienceMonth" value={formData.coachingExperienceMonth} onChange={handleChange}>
+                <select
+                  name="coachingExperienceMonth"
+                  value={formData.coachingExperienceMonth}
+                  onChange={handleChange}
+                >
                   <option value="">Select Months</option>
                   {Array.from({ length: 12 }, (_, i) => (
                     <option key={i} value={i + 1}>
@@ -197,7 +196,7 @@ const CoachRegister: React.FC = () => {
                 Coach Course Certificate <span className="required">*</span>
               </label>
               {formData.certificate.map((cert, index) => (
-                <div key={index} className="inlineInputs" style={{ marginBottom: "8px" }}>
+                <div key={index} className="inlineInputs" style={{ marginBottom: '8px' }}>
                   <input
                     type="text"
                     placeholder="Enter Certificate Name"
@@ -211,16 +210,14 @@ const CoachRegister: React.FC = () => {
                   <button
                     type="button"
                     className="uploadBtn"
-                    onClick={() =>
-                      document.getElementById(`certificateUpload-${index}`)?.click()
-                    }
+                    onClick={() => document.getElementById(`certificateUpload-${index}`)?.click()}
                   >
                     Upload
                   </button>
                   <input
                     type="file"
                     id={`certificateUpload-${index}`}
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -237,7 +234,7 @@ const CoachRegister: React.FC = () => {
                       onClick={() =>
                         setFormData({
                           ...formData,
-                          certificate: [...formData.certificate, { name: "", file: null }],
+                          certificate: [...formData.certificate, { name: '', file: null }],
                         })
                       }
                     >
@@ -295,11 +292,11 @@ const CoachRegister: React.FC = () => {
             {/* Fetch Details */}
             <div className="formGroup">
               <label>
-                Do you want to fetch your details from your Shooter ID?{" "}
+                Do you want to fetch your details from your Shooter ID?{' '}
                 <span className="required">*</span>
               </label>
               <div className="radioGroup">
-                {["yes", "no"].map((opt) => (
+                {['yes', 'no'].map((opt) => (
                   <label key={opt}>
                     <input
                       type="radio"

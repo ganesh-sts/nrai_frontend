@@ -1,6 +1,6 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import "./style.scss";
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './style.scss';
 
 interface FormData {
   email: string;
@@ -12,8 +12,8 @@ interface FormData {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
     admin: false,
     remember: false,
   });
@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
     const { name, type, checked, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
 
@@ -33,97 +33,80 @@ const LoginPage: React.FC = () => {
 
     // Single error validation
     if (!formData.email) {
-      setFormError("Please enter Email");
+      setFormError('Please enter Email');
       return;
     }
     if (!formData.password) {
-      setFormError("Please enter Password");
+      setFormError('Please enter Password');
       return;
     }
 
     // Success
     setFormError(null);
-    console.log("Login successful:", formData);
-    navigate("/dashboard"); // redirect to dashboard
+    console.log('Login successful:', formData);
+    navigate('/dashboard'); // redirect to dashboard
   };
 
-return (
-  <div className="loginPage">
+  return (
+    <div className="loginPage">
       <div className="loginContainer">
         {/* Top Row */}
         <div className="topRow">
-
           <div className="logoSection">
-      <div className="loginLogo"></div>
+            <div className="loginLogo"></div>
             <h1>LOGIN</h1>
           </div>
         </div>
 
-     {/* Bottom Content */}
-<div className="bottomContent">
-  {/* Input Fields */}
-  <div className="inputFields">
-    <input
-      type="text"
-      name="username"
-      placeholder="Username"
-      onChange={handleChange}
-    />
-    <input
-      type="password"
-      name="password"
-      placeholder="Password"
-      onChange={handleChange}
-    />
-  </div>
+        {/* Bottom Content */}
+        <div className="bottomContent">
+          {/* Input Fields */}
+          <div className="inputFields">
+            <input type="text" name="username" placeholder="Username" onChange={handleChange} />
+            <input type="password" name="password" placeholder="Password" onChange={handleChange} />
+          </div>
 
-  {/* Options Row */}
-  <div className="optionsRow">
-    <label>
-      <input
-        type="checkbox"
-        name="admin"
-        checked={formData.admin}
-        onChange={handleChange}
-      />
-      Admin
-    </label>
-    <label>
-      <input
-        type="checkbox"
-        name="remember"
-        checked={formData.remember}
-        onChange={handleChange}
-      />
-      Remember Me
-    </label>
+          {/* Options Row */}
+          <div className="optionsRow">
+            <label>
+              <input
+                type="checkbox"
+                name="admin"
+                checked={formData.admin}
+                onChange={handleChange}
+              />
+              Admin
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="remember"
+                checked={formData.remember}
+                onChange={handleChange}
+              />
+              Remember Me
+            </label>
 
-    <a href="/forgot-password" className="forgotLink">
-      Forgot Password?
-    </a>
-  </div>
+            <a href="/forgot-password" className="forgotLink">
+              Forgot Password?
+            </a>
+          </div>
 
-  {/* Buttons */}
-  <div className="buttonRow">
-    <button type="submit" className="nextBtn" onClick={handleSubmit}>
-      Sign In
-    </button>
-  </div>
-  <div className="buttonRow">
-    <button
-      type="button"
-      className="secondaryBtn"
-      onClick={() => navigate("/")}
-    >
-      New Shooter ID Register
-    </button>
-  </div>
+          {/* Buttons */}
+          <div className="buttonRow">
+            <button type="submit" className="nextBtn" onClick={handleSubmit}>
+              Sign In
+            </button>
+          </div>
+          <div className="buttonRow">
+            <button type="button" className="secondaryBtn" onClick={() => navigate('/')}>
+              New Shooter ID Register
+            </button>
+          </div>
 
-
-  <p className="tagline">NRAL Shooters | Register Shooting Range</p>
-  {formError && <div className="formError">{formError}</div>}
-</div>
-
+          <p className="tagline">NRAL Shooters | Register Shooting Range</p>
+          {formError && <div className="formError">{formError}</div>}
+        </div>
       </div>
     </div>
   );

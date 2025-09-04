@@ -1,37 +1,67 @@
-import React, { useEffect, useState } from "react";
-import "./style.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
-import { useLocation, useNavigate } from "react-router-dom";
-import { registerCoach } from "../../apis/api"; // make sure your API exists
+import React, { useEffect, useState } from 'react';
+import './style.scss';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getShooterProfilePhoto, registerCoach } from '../../apis/api'; 
 
-const CoachDetails: React.FC = () => {
+interface Certificate {
+  name: string;
+  file: File | null;
+}
+
+interface CoachFormData {
+  profilePhoto: File | null;
+  firstName: string;
+  lastName: string;
+  aadhaar: string;
+  email: string;
+  contact: string;
+  dateOfBirth: string;
+  gender: string;
+  state: string;
+  address: string;
+  shooterId: string;
+  nraiId: string;
+  eventType: string[];
+  coachingExperienceYear: string;
+  coachingExperienceMonth: string;
+  certificate: Certificate[];
+  nraiLicence: string;
+  nraiValidUpto: string;
+  issfLicence: string;
+  issfValidUpto: string;
+}
+
+const CoachDetails: React.FC = () => {  
   const navigate = useNavigate();
   const location = useLocation();
 
   const state = location.state as { formData?: any };
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
-    profilePhoto: "",
-    firstName: "",
-    lastName: "",
-    aadhaar: "",
-    email: "",
-    contact: "",
-    dateOfBirth: "",
-    gender: "",
-    state: "",
-    address: "",
-    shooterId: state?.formData?.shooterId || "",
-    nraiId: state?.formData?.nraiId || "",
+
+  const [formData, setFormData] = useState<CoachFormData>({
+    profilePhoto: null,
+    firstName: '',
+    lastName: '',
+    aadhaar: '',
+    email: '',
+    contact: '',
+    dateOfBirth: '',
+    gender: '',
+    state: '',
+    address: '',
+    shooterId: state?.formData?.shooterId || '',
+    nraiId: state?.formData?.nraiId || '',
     eventType: state?.formData?.eventType || [],
-    coachingExperienceYear: state?.formData?.coachingExperienceYear || "",
-    coachingExperienceMonth: state?.formData?.coachingExperienceMonth || "",
+    coachingExperienceYear: state?.formData?.coachingExperienceYear || '',
+    coachingExperienceMonth: state?.formData?.coachingExperienceMonth || '',
     certificate: state?.formData?.certificate || [],
-    nraiLicence: state?.formData?.nraiLicence || "",
-    nraiValidUpto: state?.formData?.nraiValidUpto || "",
-    issfLicence: state?.formData?.issfLicence || "",
-    issfValidUpto: state?.formData?.issfValidUpto || "",
+    nraiLicence: state?.formData?.nraiLicence || '',
+    nraiValidUpto: state?.formData?.nraiValidUpto || '',
+    issfLicence: state?.formData?.issfLicence || '',
+    issfValidUpto: state?.formData?.issfValidUpto || '',
   });
 
   const [formError, setFormError] = useState<string | null>(null);
@@ -41,19 +71,24 @@ const CoachDetails: React.FC = () => {
   useEffect(() => {
     if (!state?.formData.data) return;
     const data = state.formData.data;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ...data,
-      shooterId: data.shooterId || "",
-      nraiId: data.nraiId || "",
+      shooterId: data.shooterId || '',
+      nraiId: data.nraiId || '',
     }));
-    if (state.formData.fetchDetails === "yes") {
+    if (state.formData.fetchDetails === 'yes') {
       setIsPrefilled(true);
+          if (data.shooterId) {
+      getShooterProfilePhoto(data.shooterId).then(url => {
+        setProfilePhotoUrl(url);
+      });
+    }
     }
   }, [state?.formData]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -61,40 +96,39 @@ const CoachDetails: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      if (state?.formData?.fetchDetails === "yes") {
-    navigate("/coach-login");
-    return;
-  }
+    if (state?.formData?.fetchDetails === 'yes') {
+      navigate('/coach-login');
+      return;
+    }
 
     // Validation
-    if (!formData.firstName) return setFormError("Please Enter First Name");
-    if (!formData.lastName) return setFormError("Please Enter Last Name");
-    if (!formData.aadhaar) return setFormError("Please Enter Aadhaar Card number");
-    if (!formData.email) return setFormError("Please Enter Email ID");
-    if (!formData.contact) return setFormError("Please Enter Contact Number");
-    if (!formData.dateOfBirth) return setFormError("Please Enter Date of Birth");
-    if (!formData.gender) return setFormError("Please Select Gender");
-    if (!formData.state) return setFormError("Please Select State");
-    if (!formData.address) return setFormError("Please Enter Address");
+    if (!formData.firstName) return setFormError('Please Enter First Name');
+    if (!formData.lastName) return setFormError('Please Enter Last Name');
+    if (!formData.aadhaar) return setFormError('Please Enter Aadhaar Card number');
+    if (!formData.email) return setFormError('Please Enter Email ID');
+    if (!formData.contact) return setFormError('Please Enter Contact Number');
+    if (!formData.dateOfBirth) return setFormError('Please Enter Date of Birth');
+    if (!formData.gender) return setFormError('Please Select Gender');
+    if (!formData.state) return setFormError('Please Select State');
+    if (!formData.address) return setFormError('Please Enter Address');
 
     setFormError(null);
     setIsSubmitting(true);
 
     try {
       // Call the registration API here
-     
+
       await registerCoach(formData);
 
-      alert("Coach Registered Successfully!");
-      navigate("/coach-login");
+      alert('Coach Registered Successfully!');
+      navigate('/coach-login');
     } catch (error) {
       console.error(error);
-      setFormError("Registration failed. Please try again.");
+      setFormError('Registration failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   return (
     <div className="coachDetailsPage">
@@ -109,23 +143,38 @@ const CoachDetails: React.FC = () => {
               Profile Photo <span className="required">*</span>
             </label>
             <div className="inlineInputs">
-              <button type="button" className="uploadBtn">
-                View
-              </button>
-              <input
-                type="file"
-                id="profilePhotoUpload"
-                name="profilePhoto"
-                style={{ display: "none" }}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    profilePhoto: e.target.files?.[0]?.name || "",
-                  })
-                }
-              />
+<button
+  type="button"
+  className="uploadBtn"
+  onClick={() => {
+    if (profilePhotoUrl) {  
+      window.open(profilePhotoUrl, "_blank");
+    } else if (formData.profilePhoto instanceof File) {
+      window.open(URL.createObjectURL(formData.profilePhoto), "_blank");
+    } else {
+      alert("No photo available to view!");
+    }
+  }}
+>
+  View
+</button>
+
+
+<input
+  type="file"
+  id="profilePhotoUpload"
+  name="profilePhoto"
+  accept="image/*"
+  style={{ display: 'none' }}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      profilePhoto: e.target.files?.[0] || null, // <-- This must be a File
+    })
+  }
+/>
               {/* Edit icon triggers hidden file input */}
-              <label htmlFor="profilePhotoUpload" className="editIcon" >
+              <label htmlFor="profilePhotoUpload" className="editIcon">
                 <FontAwesomeIcon icon={faPenToSquare} />
               </label>
             </div>
@@ -212,11 +261,17 @@ const CoachDetails: React.FC = () => {
             <label>
               Gender<span className="required">*</span>
             </label>
-            <select name="gender" value={formData.gender} onChange={handleChange} disabled={isPrefilled}>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              disabled={isPrefilled}
+            >
               <option>Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
+
 
             {/* State dropdown */}
             <label>
@@ -229,8 +284,8 @@ const CoachDetails: React.FC = () => {
               <option value="Maharashtra">Maharashtra</option>
             </select>
 
-            {/* Address */}
-            <label>
+            {  /* Address */}
+              <label>
               Address<span className="required">*</span>
             </label>
             <textarea
@@ -256,3 +311,5 @@ const CoachDetails: React.FC = () => {
 };
 
 export default CoachDetails;
+
+
